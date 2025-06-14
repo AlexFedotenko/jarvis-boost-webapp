@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jarvis Boost</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f6f9; }
+    h1 { text-align: center; }
+    select, input { width: 100%; padding: 10px; margin-top: 10px; }
+    button { width: 100%; padding: 10px; margin-top: 15px; background: #2aabee; color: #fff; border: none; border-radius: 6px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>🚀 Jarvis Boost</h1>
+  <label>Выберите услугу:</label>
+  <select id="service"></select>
+  <label>Ссылка:</label>
+  <input type="url" id="link" placeholder="https://..." />
+  <label>Количество:</label>
+  <input type="number" id="quantity" value="100" />
+  <div id="summary">💵 Итого: —</div>
+  <button onclick="calculatePrice()">💰 Рассчитать</button>
+  <button onclick="submitOrder()">📨 Отправить заказ</button>
+  <script>
+    async function fetchServices() {
+      const res = await fetch("/api/services");
+      const data = await res.json();
+      const serviceSelect = document.getElementById("service");
+      data.forEach(service => {
+        const option = document.createElement("option");
+        option.value = service.service;
+        option.dataset.price = service.rate;
+        option.textContent = `${service.name} (${service.rate}₽ за 1)`;
+        serviceSelect.appendChild(option);
+      });
+    }
+    function calculatePrice() {
+      const s = document.getElementById("service");
+      const p = parseFloat(s.options[s.selectedIndex].dataset.price);
+      const q = parseInt(document.getElementById("quantity").value);
+      document.getElementById("summary").textContent = `💵 Итого: ${(p*q).toFixed(2)}₽`;
+    }
+    function submitOrder() {
+      const order = {
+        service: document.getElementById("service").value,
+        link: document.getElementById("link").value,
+        quantity: document.getElementById("quantity").value
+      };
+      Telegram.WebApp.sendData(JSON.stringify(order));
+      alert("✅ Заказ отправлен!");
+    }
+    fetchServices();
+  </script>
+</body>
+</html>
